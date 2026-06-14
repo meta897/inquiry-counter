@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>電話問い合わせカウンター</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans",sans-serif;background:#f5f5f3;color:#1a1a18;min-height:100vh;padding:1.5rem}
+.container{max-width:720px;margin:0 auto;background:#fff;border-radius:14px;border:1px solid #e0dfd8;padding:1.5rem}
+h1{font-size:18px;font-weight:500;margin-bottom:1.5rem;color:#1a1a18}
+.tabs{display:flex;border-bottom:1px solid #e0dfd8;margin-bottom:1.5rem}
+.tab{padding:8px 18px;font-size:14px;cursor:pointer;color:#888;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.active{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
+.panel{display:none}.panel.active{display:block}
+.label{font-size:13px;font-weight:500;color:#888;margin-bottom:8px}
+.search-box{position:relative;margin-bottom:.75rem}
+.search-box input{width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;background:#fff;color:#1a1a18;outline:none}
+.search-box input:focus{border-color:#888}
+.dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #ccc;border-radius:8px;max-height:220px;overflow-y:auto;z-index:10;display:none;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.dropdown.open{display:block}
+.dd-item{padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid #f0efe8}
+.dd-item:last-child{border-bottom:none}
+.dd-item:hover{background:#f5f5f3}
+.dd-item mark{background:none;color:#1a6fbf;font-weight:500}
+.dd-sub{font-size:12px;color:#aaa;margin-top:2px}
+.dd-empty{padding:10px 14px;font-size:14px;color:#aaa}
+.kind-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.kind-btn{padding:7px 14px;border:1px solid #ccc;border-radius:8px;font-size:14px;cursor:pointer;background:#fff;color:#1a1a18;transition:background .1s}
+.kind-btn.active{background:#e8f0fb;color:#1a6fbf;border-color:#a8c4ef}
+.kind-btn:hover{background:#f5f5f3}
+.record-btn{width:100%;padding:14px;font-size:17px;font-weight:500;border:1px solid #ccc;border-radius:12px;background:#fff;color:#1a1a18;cursor:pointer;margin-bottom:1.5rem;transition:background .1s}
+.record-btn:hover{background:#f5f5f3}
+.record-btn:active{transform:scale(0.98)}
+.record-btn:disabled{opacity:.4;cursor:not-allowed}
+hr{border:none;border-top:1px solid #e8e7e0;margin:0 0 1.5rem}
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.5rem}
+.total-card{background:#f5f5f3;border-radius:8px;padding:1rem}
+.total-label{font-size:13px;color:#888;margin-bottom:4px}
+.total-num{font-size:24px;font-weight:500}
+.log-area{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:12px;max-height:200px;overflow-y:auto;margin-bottom:1.5rem}
+.log-row{font-size:13px;color:#666;line-height:2;border-bottom:1px solid #f0efe8;display:flex;justify-content:space-between;align-items:center}
+.log-row:last-child{border-bottom:none}
+.log-undo{background:none;border:none;cursor:pointer;color:#aaa;font-size:12px;padding:2px 6px;border-radius:4px}
+.log-undo:hover{background:#f5f5f3;color:#1a1a18}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.btn-action{padding:8px 16px;border:1px solid #ccc;background:#fff;border-radius:8px;font-size:14px;cursor:pointer;color:#1a1a18;display:flex;align-items:center;gap:6px}
+.btn-action:hover{background:#f5f5f3}
+.btn-action i{font-size:16px}
+.selected-info{font-size:14px;color:#888;margin-bottom:8px;min-height:20px}
+.selected-info span{color:#1a1a18;font-weight:500}
+.upload-zone{border:1.5px dashed #ccc;border-radius:12px;padding:2rem;text-align:center;cursor:pointer;margin-bottom:1rem;transition:background .1s}
+.upload-zone:hover{background:#f5f5f3}
+.upload-zone input{display:none}
+.upload-icon{font-size:32px;color:#aaa;display:block;margin-bottom:8px}
+.map-box{background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:1rem;margin-bottom:1rem}
+.map-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:14px}
+.map-row:last-child{margin-bottom:0}
+.map-label{width:140px;color:#888;flex-shrink:0}
+.map-row select{flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18}
+.preview-box{background:#f5f5f3;border-radius:8px;padding:10px 12px;font-size:13px;color:#666;margin-bottom:1rem;max-height:120px;overflow-y:auto}
+.preview-box table{width:100%;border-collapse:collapse}
+.preview-box th{font-weight:500;color:#1a1a18;padding:4px 8px;text-align:left;border-bottom:1px solid #e0dfd8}
+.preview-box td{padding:4px 8px}
+.msg{font-size:13px;padding:8px 12px;border-radius:8px;margin-bottom:1rem}
+.msg-success{background:#e8f5ec;color:#1a7a3a}
+.msg-warn{background:#fdf3e0;color:#a07020}
+.course-count{font-size:13px;color:#888;margin-bottom:1rem}
+.course-count span{font-weight:500;color:#1a1a18}
+.add-row{display:flex;gap:8px;margin-bottom:8px}
+.add-row input{flex:1;padding:7px 10px;border:1px solid #ccc;border-radius:8px;font-size:14px;background:#fff;color:#1a1a18}
+.btn-sm{padding:7px 12px;border:1px solid #ccc;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;color:#1a1a18;white-space:nowrap}
+.btn-sm:hover{background:#f5f5f3}
+.course-list{display:flex;flex-wrap:wrap;gap:6px;max-height:200px;overflow-y:auto;margin-top:8px}
+.course-tag{display:flex;align-items:center;gap:4px;padding:4px 10px;background:#f5f5f3;border-radius:8px;font-size:13px}
+.course-tag .tag-sub{font-size:11px;color:#aaa;margin-left:2px}
+.course-tag button{background:none;border:none;cursor:pointer;color:#aaa;font-size:14px;line-height:1;padding:0 2px}
+.course-tag button:hover{color:#1a1a18}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>電話問い合わせカウンター</h1>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('counter')">カウント</button>
+    <button class="tab" onclick="switchTab('import')">講座リスト取込</button>
+    <button class="tab" onclick="switchTab('manage')">リスト管理</button>
+  </div>
+
+  <!-- カウントパネル -->
+  <div class="panel active" id="panel-counter">
+    <div class="label">講座を検索</div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="講座名またはコードで検索..." autocomplete="off"/>
+      <div class="dropdown" id="dropdown"></div>
+    </div>
+    <div class="selected-info" id="selected-info">講座を選択してください</div>
+    <div class="label">問い合わせ種別</div>
+    <div class="kind-row" id="kind-row"></div>
+    <button class="record-btn" id="record-btn" disabled onclick="recordInquiry()">＋ 記録する</button>
+    <hr/>
+    <div class="label">集計</div>
+    <div class="totals">
+      <div class="total-card"><div class="total-label">本日の合計</div><div class="total-num" id="total-today">0</div></div>
+      <div class="total-card"><div class="total-label">累計（今月）</div><div class="total-num" id="total-month">0</div></div>
+    </div>
+    <div class="label">記録ログ</div>
+    <div class="log-area" id="log-area"><span style="font-size:13px;color:#aaa">まだ記録がありません</span></div>
+    <div class="actions">
+      <button class="btn-action" onclick="exportCSV()"><i class="ti ti-download"></i> CSVで書き出し</button>
+      <button class="btn-action" onclick="resetToday()"><i class="ti ti-refresh"></i> 本日リセット</button>
+    </div>
+  </div>
+
+  <!-- 取込パネル -->
+  <div class="panel" id="panel-import">
+    <div class="label">CSVファイルを読み込む</div>
+    <div class="upload-zone" onclick="document.getElementById('csv-file').click()">
+      <i class="ti ti-file-upload upload-icon"></i>
+      <p style="font-size:14px;color:#666">クリックしてCSVファイルを選択</p>
+      <p style="font-size:12px;color:#aaa;margin-top:4px">文字コード：UTF-8 または Shift-JIS 対応</p>
+      <input type="file" id="csv-file" accept=".csv" onchange="loadCSV(event)"/>
+    </div>
+    <div id="map-section" style="display:none">
+      <div class="label">列の割り当て</div>
+      <p style="font-size:13px;color:#888;margin-bottom:10px">CSVのどの列を使うか選んでください</p>
+      <div class="map-box">
+        <div class="map-row">
+          <span class="map-label">講座名 <span style="color:#c0392b">*必須</span></span>
+          <select id="col-name"></select>
+        </div>
+        <div class="map-row">
+          <span class="map-label">講座コード（任意）</span>
+          <select id="col-code"></select>
+        </div>
+      </div>
+      <div class="label">プレビュー（先頭5件）</div>
+      <div class="preview-box" id="preview-box"></div>
+      <div id="import-msg"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-action" onclick="importCourses(false)"><i class="ti ti-plus"></i> 追加で取込む</button>
+        <button class="btn-action" onclick="importCourses(true)"><i class="ti ti-replace"></i> 上書きで取込む</button>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:8px">「追加」は既存リストに加えます。「上書き」は既存リストを全て入れ替えます。</p>
+    </div>
+  </div>
+
+  <!-- 管理パネル -->
+  <div class="panel" id="panel-manage">
+    <div class="course-count" id="course-count"></div>
+    <div class="label">手動で追加</div>
+    <div class="add-row">
+      <input type="text" id="new-name-input" placeholder="講座名"/>
+      <input type="text" id="new-code-input" placeholder="コード（任意）" style="max-width:120px"/>
+      <button class="btn-sm" onclick="addCourse()">追加</button>
+    </div>
+    <div class="label">登録済み講座</div>
+    <div class="course-list" id="course-list"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+const DEFAULT_COURSES = [
+  {name:"ヨガ入門",code:"Y001"},{name:"フラワーアレンジメント",code:"F001"},
+  {name:"水彩画",code:"A001"},{name:"書道",code:"S001"},{name:"ピアノ初級",code:"M001"},
+  {name:"英会話",code:"E001"},{name:"料理教室",code:"C001"},{name:"陶芸",code:"A002"},
+  {name:"太極拳",code:"T001"},{name:"着付け基礎",code:"K001"}
+];
+const DEFAULT_KINDS = ["新規申込","講座内容確認","変更・キャンセル","体験申込","その他"];
+
+let state = loadState();
+let selectedCourse = null;
+let selectedKind = null;
+let csvData = [], csvHeaders = [];
+
+function loadState(){
+  try{ const r=localStorage.getItem("iq3"); if(r) return JSON.parse(r); }catch(e){}
+  return {courses:DEFAULT_COURSES,kinds:DEFAULT_KINDS,log:[],monthTotal:0};
+}
+function saveState(){ try{ localStorage.setItem("iq3",JSON.stringify(state)); }catch(e){} }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function nowStr(){ const d=new Date(); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+
+function switchTab(tab){
+  document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",["counter","import","manage"][i]===tab));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById("panel-"+tab).classList.add("active");
+  if(tab==="manage") renderManage();
+}
+
+function renderKinds(){
+  const row=document.getElementById("kind-row"); row.innerHTML="";
+  state.kinds.forEach(k=>{
+    const btn=document.createElement("button"); btn.className="kind-btn"+(selectedKind===k?" active":"");
+    btn.textContent=k; btn.onclick=()=>{ selectedKind=selectedKind===k?null:k; renderKinds(); updateRecordBtn(); };
+    row.appendChild(btn);
+  });
+}
+function updateRecordBtn(){ document.getElementById("record-btn").disabled=!(selectedCourse&&selectedKind); }
+
+function renderLog(){
+  const today=todayStr(), area=document.getElementById("log-area");
+  const logs=state.log.filter(l=>l.date===today).slice().reverse();
+  if(!logs.length){ area.innerHTML='<span style="font-size:13px;color:#aaa">まだ記録がありません</span>'; return; }
+  area.innerHTML=logs.map((l,i)=>{
+    const idx=state.log.length-1-i;
+    const sub=l.code?`<span style="color:#aaa"> [${l.code}]</span>`:"";
+    return `<div class="log-row"><span><span style="color:#aaa">${l.time}</span>　${l.course}${sub}　<span style="color:#888">${l.kind}</span></span><button class="log-undo" onclick="undoLog(${idx})">取消</button></div>`;
+  }).join("");
+}
+
+function renderTotals(){
+  document.getElementById("total-today").textContent=state.log.filter(l=>l.date===todayStr()).length;
+  document.getElementById("total-month").textContent=state.monthTotal||0;
+}
+
+function renderManage(){
+  document.getElementById("course-count").innerHTML=`登録講座数：<span>${state.courses.length}件</span>`;
+  document.getElementById("course-list").innerHTML=state.courses.map(c=>
+    `<div class="course-tag">${c.name}${c.code?`<span class="tag-sub">${c.code}</span>`:""}<button onclick="removeCourse('${c.name.replace(/'/g,"\\'")}')">×</button></div>`
+  ).join("");
+}
+
+function render(){ renderKinds(); renderLog(); renderTotals(); }
+
+const searchInput=document.getElementById("search-input");
+const dropdown=document.getElementById("dropdown");
+
+searchInput.addEventListener("input",()=>{
+  const q=searchInput.value.trim();
+  selectedCourse=null;
+  document.getElementById("selected-info").innerHTML="講座を選択してください";
+  updateRecordBtn();
+  if(!q){ dropdown.classList.remove("open"); return; }
+  const hits=state.courses.filter(c=>c.name.includes(q)||(c.code&&c.code.includes(q))).slice(0,20);
+  if(!hits.length){ dropdown.innerHTML='<div class="dd-empty">該当なし</div>'; dropdown.classList.add("open"); return; }
+  dropdown.innerHTML=hits.map(c=>{
+    const hl=c.name.replace(q,`<mark>${q}</mark>`);
+    return `<div class="dd-item" onclick="selectCourse('${c.name.replace(/'/g,"\\'")}','${(c.code||"").replace(/'/g,"\\'")}')"><div>${hl}</div>${c.code?`<div class="dd-sub">${c.code}</div>`:""}</div>`;
+  }).join("");
+  dropdown.classList.add("open");
+});
+
+document.addEventListener("click",e=>{ if(!e.target.closest(".search-box")) dropdown.classList.remove("open"); });
+
+function selectCourse(name,code){
+  selectedCourse={name,code};
+  searchInput.value=name;
+  dropdown.classList.remove("open");
+  document.getElementById("selected-info").innerHTML=`選択中：<span>${name}</span>${code?` <span style="color:#aaa;font-weight:400">[${code}]</span>`:""}`;
+  updateRecordBtn();
+}
+
+function recordInquiry(){
+  if(!selectedCourse||!selectedKind) return;
+  state.log.push({date:todayStr(),time:nowStr(),course:selectedCourse.name,code:selectedCourse.code||"",kind:selectedKind});
+  state.monthTotal=(state.monthTotal||0)+1;
+  saveState();
+  selectedCourse=null; selectedKind=null;
+  searchInput.value="";
+  document.getElementById("selected-info").innerHTML="講座を選択してください";
+  updateRecordBtn(); render();
+}
+
+function undoLog(idx){
+  state.log.splice(idx,1);
+  state.monthTotal=Math.max(0,(state.monthTotal||0)-1);
+  saveState(); renderLog(); renderTotals();
+}
+
+function addCourse(){
+  const name=document.getElementById("new-name-input").value.trim();
+  const code=document.getElementById("new-code-input").value.trim();
+  if(!name||state.courses.find(c=>c.name===name)) return;
+  state.courses.push({name,code}); saveState(); renderManage();
+  document.getElementById("new-name-input").value="";
+  document.getElementById("new-code-input").value="";
+}
+
+function removeCourse(name){
+  state.courses=state.courses.filter(c=>c.name!==name);
+  saveState(); renderManage();
+}
+
+function resetToday(){
+  if(!confirm("本日のログをリセットしますか？")) return;
+  const today=todayStr();
+  const removed=state.log.filter(l=>l.date===today).length;
+  state.log=state.log.filter(l=>l.date!==today);
+  state.monthTotal=Math.max(0,(state.monthTotal||0)-removed);
+  saveState(); render();
+}
+
+function exportCSV(){
+  const rows=[["日付","講座コード","講座名","種別"]];
+  state.log.forEach(l=>rows.push([l.date,l.code||"",l.course,l.kind]));
+  const csv=rows.map(r=>r.join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a"); a.href=url; a.download="問い合わせ記録.csv"; a.click();
+}
+
+function loadCSV(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const result=Papa.parse(ev.target.result,{header:true,skipEmptyLines:true,encoding:"UTF-8"});
+    if(!result.data||!result.data.length){ showMsg("CSVの読み込みに失敗しました","warn"); return; }
+    csvData=result.data; csvHeaders=result.meta.fields||[];
+    buildMapSelects(); showPreview(); document.getElementById("map-section").style.display="block";
+    document.getElementById("import-msg").innerHTML="";
+  };
+  reader.readAsText(file,"UTF-8");
+  e.target.value="";
+}
+
+function buildMapSelects(){
+  ["col-name","col-code"].forEach(id=>{
+    const sel=document.getElementById(id); sel.innerHTML="";
+    if(id==="col-code") sel.innerHTML='<option value="">（使用しない）</option>';
+    csvHeaders.forEach(h=>{ const opt=document.createElement("option"); opt.value=h; opt.textContent=h; sel.appendChild(opt); });
+  });
+  const gName=csvHeaders.find(h=>/講座名|name|コース名/i.test(h));
+  const gCode=csvHeaders.find(h=>/コード|code|番号|id/i.test(h));
+  if(gName) document.getElementById("col-name").value=gName;
+  if(gCode) document.getElementById("col-code").value=gCode;
+  document.getElementById("col-name").onchange=showPreview;
+  document.getElementById("col-code").onchange=showPreview;
+}
+
+function showPreview(){
+  const nc=document.getElementById("col-name").value, cc=document.getElementById("col-code").value;
+  const cols=[nc,...(cc?[cc]:[])];
+  const box=document.getElementById("preview-box");
+  box.innerHTML=`<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${csvData.slice(0,5).map(row=>`<tr>${cols.map(c=>`<td>${row[c]||""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+
+function importCourses(overwrite){
+  const nc=document.getElementById("col-name").value, cc=document.getElementById("col-code").value;
+  if(!nc){ showMsg("講座名の列を選択してください","warn"); return; }
+  const newC=csvData.map(row=>({name:(row[nc]||"").trim(),code:cc?(row[cc]||"").trim():""})).filter(c=>c.name);
+  if(!newC.length){ showMsg("取込める講座が見つかりませんでした","warn"); return; }
+  if(overwrite){
+    state.courses=newC; saveState(); showMsg(`${newC.length}件の講座を取込みました`,"success");
+  } else {
+    const ex=new Set(state.courses.map(c=>c.name)); let added=0;
+    newC.forEach(c=>{ if(!ex.has(c.name)){ state.courses.push(c); added++; } });
+    if(!added){ showMsg("すべて既存の講座と重複しているため、追加はありませんでした","warn"); return; }
+    saveState(); showMsg(`${added}件の講座を追加しました`,"success");
+  }
+}
+
+function showMsg(text,type="success"){
+  document.getElementById("import-msg").innerHTML=`<div class="msg msg-${type}">${text}</div>`;
+}
+
+render();
+</script>
+</body>
+</html>
